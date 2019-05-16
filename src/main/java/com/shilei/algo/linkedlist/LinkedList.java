@@ -18,25 +18,11 @@ public class LinkedList<T> {
 
     private Node<T> node;
 
-    private class Node<T>{
+    private int size = 0;
 
-        public Node(T value) {
-            this.value = value;
-        }
 
-        // 值
-        T value;
-
-        // 下一个节点
-        Node<T> next;
-
-        // 上一个节点
-        Node<T> prev;
-
-        @Override
-        public String toString() {
-            return String.valueOf(value);
-        }
+    public int getSize() {
+        return size;
     }
 
     /**
@@ -56,6 +42,7 @@ public class LinkedList<T> {
         }
         // 将尾指针指向新节点
         node = _node;
+        size++;
     }
 
     /**
@@ -81,7 +68,34 @@ public class LinkedList<T> {
         return null;
     }
 
+    /**
+     * 查找第index索引下的节点
+     * @param index
+     * @return
+     */
+    public Node<T> index(int index){
+        Node<T> _node = null;
+        if(index < 0 && index > size){
+            return _node;
+        }
+        if(index == 0){
+            return head;
+        }
+        if(index == size){
+            return node;
+        }
+        _node = head;
+        for(int i=1; i<=index; i++){
+            _node = _node.next;
+        }
+        return _node;
+    }
 
+    /**
+     * 查看链表中是否存在这个节点
+     * @param t
+     * @return
+     */
     public boolean contains(T t){
         Node<T> _node = this.find(t);
         return _node == null ? false:true;
@@ -99,27 +113,43 @@ public class LinkedList<T> {
         if(t == null){
             return false;
         }
-        Node<T> _node;
-        if(t == head.value){
+        Node<T> _node,prevNode,nextNode;
+        if(t.equals(head.value)){
             _node = head;
             // 移除头结点
             head = head.next;
             // 将头节点指向null,释放此节点
             _node.next = null;
+            if(head != null){
+                head.prev = null;
+            }else{
+                node.prev = null;
+                node = head;
+            }
+            size--;
             return true;
         }
         _node = head.next;
         boolean flag = false;
         while (_node != null){//直到遍历到节点为空
             if(t.equals(_node.value)){
-                Node<T> prevNode = _node.prev;
-                Node<T> nextNode = _node.next;
-                prevNode.next = nextNode;
-                nextNode.prev = prevNode;
+                prevNode = _node.prev;
+                nextNode = _node.next;
+                if(prevNode != null){
+                    prevNode.next = nextNode;
+                    if(nextNode == null){// 遍历到最后一个节点，控制好边界
+                        node = prevNode;
+                    }
+                }
+                if(nextNode != null){
+                    nextNode.prev = prevNode;
+                }
                 _node.next = null;
                 _node.prev = null;
                 flag = true;
+                size--;
             }
+
             _node = _node.next;
         }
         return flag;
@@ -164,15 +194,13 @@ public class LinkedList<T> {
     }
 
     /**
-     * 单链表反转
+     * 1.单链表反转
      */
     public void reverse(){
         if(head == null){
             return ;
         }
-        Node<T> _node = head;
-        Node<T> prev = null;
-        Node<T> next;
+        Node<T> _node = head,prev = null,next;
         while (_node != null){
             next = _node.next;
             // 将当前节点指向前一个节点，进行反转
@@ -185,8 +213,117 @@ public class LinkedList<T> {
     }
 
 
+    /**
+     * 移除倒数第index个位置的数组
+     * @param index
+     */
+    public void removeIndex(int index){
+        if(index < 1 && index > size){
+            return ;
+        }
+        if(head == null){
+            return ;
+        }
+        Node<T> _node = head,prev,next;
+        int m = size-index;
+        System.out.println("m:"+m);
+        if(m == 0){//移除链表头节点
+            remove(head.value);
+            return ;
+        }
+//        for(int j=1; j<=m; j++){
+//            _node = _node.next;
+//        }
 
-    private static class User{
+        _node = this.index(m);
+        System.out.println("_node:"+_node);
+        prev = _node.prev;
+        next = _node.next;
+        if(prev != null){
+            prev.next = next;
+        }
+        if(next != null){
+            next.prev = prev;
+        }
+        size--;
+        _node.prev = null;
+        _node.next = null;
+
+    }
+
+    /**
+     * 查找链表的中间节点
+     * @return
+     */
+    public Node<T> findMidNode(){
+        int mid = size%2 == 0 ? (size/2):(size/2+1);
+        System.out.println("mid:"+mid);
+        mid--;
+        return this.index(mid);
+    }
+
+    /**
+     * 查找链表的中间节点-通过快慢遍历
+     * @return
+     */
+    public Node<T> findMidNodeByFL(){
+        if(head == null){
+            return null;
+        }
+        Node<T> fast = head;
+        Node<T> slow = head;
+        while(fast.next != null && fast.next.next != null){
+            fast = fast.next.next;
+            slow = slow.next;
+        }
+        return slow;
+    }
+
+    /**
+     * 检测链表中是否有环
+     * @return
+     */
+    public boolean chechCircle(){
+        if(head == null){
+            return false;
+        }
+        //node.next = head;
+        Node<T> fast = head.next;
+        Node<T> slow = head;
+        while (fast != null && fast.next != null){
+            fast = fast.next.next;
+            slow = slow.next;
+
+            if(slow == fast){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+    public class Node<T>{
+
+        public Node(T value) {
+            this.value = value;
+        }
+
+        // 值
+        T value;
+
+        // 下一个节点
+        Node<T> next;
+
+        // 上一个节点
+        Node<T> prev;
+
+        @Override
+        public String toString() {
+            return String.valueOf(value);
+        }
+    }
+
+    public static class User{
 
         String name;
 
@@ -210,34 +347,19 @@ public class LinkedList<T> {
         User user2 = new User("zhangsan2");
         User user3 = new User("zhangsan3");
         User user4 = new User("zhangsan4");
-        User user5 = new User("zhangsan2");
-        User user7 = new User("zhangsan5");
-        User user6 = new User("zhangsan2");
-
         linkedList.add(user1);
-        linkedList.add(user2);
-        linkedList.add(user3);
-        linkedList.add(user4);
-        linkedList.add(user5);
-        linkedList.add(user7);
+//        linkedList.add(user2);
+//        linkedList.add(user3);
+//        linkedList.add(user4);
 
         linkedList.print();
         linkedList.reversePrint();
+        System.out.println("remove(user1):"+linkedList.remove(user1));
 
-        System.out.println("find(user2):"+linkedList.find(user2));
-        System.out.println("find(user6):"+linkedList.find(user6));
-        System.out.println("contains(user2):"+linkedList.contains(user2));
-        System.out.println("contains(user6):"+linkedList.contains(user6));
-
-        System.out.println("remove(user5):"+linkedList.remove(user5));
-        System.out.println("remove(user6):"+linkedList.remove(user6));
-
+        System.out.println("size:"+linkedList.getSize());
         linkedList.print();
+        System.out.println("======================");
         linkedList.reversePrint();
-        System.out.println("==============");
-        linkedList.reverse();
-        linkedList.print();
-
 
     }
 
