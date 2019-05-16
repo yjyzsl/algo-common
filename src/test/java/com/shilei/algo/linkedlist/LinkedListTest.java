@@ -108,12 +108,68 @@ public class LinkedListTest {
     }
 
 
-    /**
-     * 检测链表中是否有环
-     */
+
     @Test
-    public void testChechCircle(){
-        System.out.println(linkedList.chechCircle());
+    public void testMergeLinkedList(){
+
+        LinkedList<Integer> aLinkedList = new LinkedList<>();
+        aLinkedList.add(1);
+        aLinkedList.add(5);
+        aLinkedList.add(8);
+        aLinkedList.add(10);
+        aLinkedList.add(12);
+
+        LinkedList<Integer> bLinkedList = new LinkedList<>();
+        bLinkedList.add(2);
+        bLinkedList.add(4);
+        bLinkedList.add(10);
+        bLinkedList.add(12);
+        bLinkedList.add(12);
+        bLinkedList.add(13);
+
+        LinkedList.Node<Integer> megerHead = LinkedList.mergeLinkedList(aLinkedList.getHead(),bLinkedList.getHead());
+        megerHead.printAll();
+
     }
+
+
+    @Test
+    public void testEntryNodeOfLoop(){
+        LinkedList linkedList = new LinkedList();
+        linkedList.add(1);
+        linkedList.add(2);
+        linkedList.add(3);
+        linkedList.add(4);
+        linkedList.add(5);
+        linkedList.add(6);
+
+        System.out.println("===========================================");
+
+        LinkedList.Node<Integer> entryNode = linkedList.entryNodeOfLoop();
+        System.out.println(entryNode);
+
+
+    }
+
+    @Test
+    public void testFindKthToTail(){
+        LinkedList linkedList = new LinkedList();
+        linkedList.add(1);
+        linkedList.add(2);
+        linkedList.add(3);
+        linkedList.add(4);
+        linkedList.add(5);
+        linkedList.add(6);
+
+        System.out.println("===========================================");
+
+        LinkedList.Node<Integer> entryNode = linkedList.findKthToTail(5);
+        System.out.println(entryNode);
+
+
+    }
+
+
+
 
 }

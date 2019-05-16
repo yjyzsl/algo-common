@@ -4,10 +4,11 @@ package com.shilei.algo.linkedlist;
  * @Description: 基于链表实现一个功能
  *
  *  1.单链表反转
- *  2.链表中环的检测
- *  3.两个有序链表合并
- *  4.删除链表倒数第n个节点
- *  5.求链表的中间节点
+ *  2.找到链表环中的某个节点
+ *  3.找链表环中的入口节点
+ *  4.两个有序链表合并
+ *   5.删除链表倒数第n个节点
+ *  6.求链表的中间节点
  *
  * @Author: shilei
  * @Date: 2019/5/15 20:04
@@ -23,6 +24,10 @@ public class LinkedList<T> {
 
     public int getSize() {
         return size;
+    }
+
+    public Node<T> getHead() {
+        return head;
     }
 
     /**
@@ -203,6 +208,9 @@ public class LinkedList<T> {
         Node<T> _node = head,prev = null,next;
         while (_node != null){
             next = _node.next;
+//            if(next == null){// 在这里设置头节点，有要增加一次判断所以效率比循环外设置慢一点
+//                head = _node;
+//            }
             // 将当前节点指向前一个节点，进行反转
             _node.next = prev;
             prev = _node;
@@ -212,6 +220,52 @@ public class LinkedList<T> {
         head = prev;
     }
 
+    /**
+     * 两个链表合并
+     * @param aList
+     * @param bList
+     * @return
+     */
+    public static Node<Integer> mergeLinkedList(Node<Integer> aList,Node<Integer> bList){
+        if(aList == null){
+            return bList;
+        }
+        if(bList == null){
+            return aList;
+        }
+        Node<Integer> mergeHead = null;
+        if(aList.value < bList.value){
+            mergeHead = aList;
+            mergeHead.next = mergeLinkedList(aList.next,bList);
+        }else{
+            mergeHead = bList;
+            mergeHead.next = mergeLinkedList(aList,bList.next);
+        }
+        return mergeHead;
+    }
+
+    /**
+     * 查找倒数第K个位置的节点
+     * @return
+     */
+    public Node<T> findKthToTail(int k){
+        if(head == null){
+            return head;
+        }
+        Node<T> aNode = head,bNode = head;
+        for(int i=0; i<k; i++){
+            aNode = aNode.next;
+            if(aNode == null){
+                return aNode;
+            }
+        }
+        System.out.println(aNode);
+        while(aNode != null){
+            aNode = aNode.next;
+            bNode = bNode.next;
+        }
+        return bNode;
+    }
 
     /**
      * 移除倒数第index个位置的数组
@@ -280,29 +334,65 @@ public class LinkedList<T> {
     }
 
     /**
-     * 检测链表中是否有环
+     * 找到链表环中的某个节点
      * @return
      */
-    public boolean chechCircle(){
+    public Node<T> meetingNode(){
         if(head == null){
-            return false;
+            return head;
         }
-        //node.next = head;
-        Node<T> fast = head.next;
-        Node<T> slow = head;
-        while (fast != null && fast.next != null){
+        // TODO 制造环
+        if(size > 3){
+            System.out.println("head.next.next:"+head.next.next);
+            node.next = head.next.next;
+        }
+        Node<T> fast = head.next,slow = head;
+        while (fast != null && fast.next != null){// 如果存在环会一直喜欢下去
+            if(fast == slow){
+                return slow;
+            }
             fast = fast.next.next;
             slow = slow.next;
-
-            if(slow == fast){
-                return true;
-            }
         }
-        return false;
+        return null;
+    }
+
+    /**
+     * 查找链表中环的入口节点
+     * @return
+     */
+    public Node<T> entryNodeOfLoop(){
+        if(head == null){
+            return head;
+        }
+        // 1.找到相遇的节点
+        Node<T> meetingNode = meetingNode();
+        System.out.println("meetingNode:"+meetingNode);
+        // 2.计算环有几个节点
+        Node<T> _node = meetingNode.next;
+        int cnt = 1;
+        while(_node != meetingNode){
+            ++cnt;
+            _node = _node.next;
+        }
+        System.out.println("cnt:"+cnt);
+        //
+        Node<T> aNode=head,bNode=head;
+        for(int i=0; i<cnt; ++i){// 3.a指针先走完环的数量走完
+            aNode = aNode.next;
+        }
+        int j = 0;
+        while(aNode != bNode){// 4.a,b指针一起移动，当相遇时则为环的入口，移动的步数为(size-cnt)
+            aNode = aNode.next;
+            bNode = bNode.next;
+            j++;
+        }
+        System.out.println("j:"+j);
+        return aNode;
     }
 
 
-    public class Node<T>{
+    public static class Node<T>{
 
         public Node(T value) {
             this.value = value;
@@ -321,6 +411,19 @@ public class LinkedList<T> {
         public String toString() {
             return String.valueOf(value);
         }
+
+        /**
+         * 遍历出当前节点以及后面的节点
+         */
+        public void printAll(){
+            System.out.print(value+",");
+            Node<T> _node = next;
+            while(_node != null){
+                System.out.print(_node.value+",");
+                _node = _node.next;
+            }
+        }
+
     }
 
     public static class User{
@@ -348,18 +451,23 @@ public class LinkedList<T> {
         User user3 = new User("zhangsan3");
         User user4 = new User("zhangsan4");
         linkedList.add(user1);
-//        linkedList.add(user2);
-//        linkedList.add(user3);
-//        linkedList.add(user4);
+        linkedList.add(user2);
+        linkedList.add(user3);
+        linkedList.add(user4);
 
         linkedList.print();
         linkedList.reversePrint();
-        System.out.println("remove(user1):"+linkedList.remove(user1));
 
-        System.out.println("size:"+linkedList.getSize());
+        System.out.println("====================");
+        linkedList.reverse();
         linkedList.print();
-        System.out.println("======================");
-        linkedList.reversePrint();
+
+//        System.out.println("remove(user1):"+linkedList.remove(user1));
+//
+//        System.out.println("size:"+linkedList.getSize());
+//        linkedList.print();
+//        System.out.println("======================");
+//        linkedList.reversePrint();
 
     }
 
