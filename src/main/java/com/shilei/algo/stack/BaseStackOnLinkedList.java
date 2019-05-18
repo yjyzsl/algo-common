@@ -9,6 +9,11 @@ package com.shilei.algo.stack;
 public class BaseStackOnLinkedList<T> {
 
     private Node<T> head;
+    private int size;
+
+    public BaseStackOnLinkedList() {
+        this.size = 0;
+    }
 
     /**
      * 弹出栈顶元素
@@ -16,6 +21,7 @@ public class BaseStackOnLinkedList<T> {
      */
     public T pop(){
         if(head == null){
+            System.out.println("stack is empty.");
             return null;
         }
         Node<T> node = head;
@@ -23,6 +29,7 @@ public class BaseStackOnLinkedList<T> {
         head = node.next;
         // 断开头节点指针
         node.next = null;
+        size--;
         return node.value;
     }
 
@@ -38,6 +45,21 @@ public class BaseStackOnLinkedList<T> {
         head = new Node(t);
         // 新栈顶指向旧栈顶
         head.next = node;
+        size++;
+    }
+
+    /**
+     * 清空栈
+     */
+    public void clear(){
+        for(Node<T> node = head; node != null;){//将栈中节点之间的指针都断开
+            Node<T> next = node.next;
+            node.next = null;
+            node.value = null;
+            node = next;
+            size--;
+        }
+        head = null;
     }
 
     public void print(){
@@ -53,7 +75,9 @@ public class BaseStackOnLinkedList<T> {
         System.out.println();
     }
 
-
+    public int getSize() {
+        return size;
+    }
 
     public static class Node<T>{
         private T value;
@@ -95,11 +119,15 @@ public class BaseStackOnLinkedList<T> {
         baseStack.push(3);
         baseStack.push(4);
         baseStack.print();
-        System.out.println(baseStack.pop());
-        System.out.println(baseStack.pop());
-        System.out.println(baseStack.pop());
-        System.out.println(baseStack.pop());
-
+        System.out.println("size:"+baseStack.getSize());
+//        System.out.println(baseStack.pop());
+//        System.out.println(baseStack.pop());
+//        System.out.println(baseStack.pop());
+//        System.out.println(baseStack.pop());
+        baseStack.clear();
+        System.out.println("================");
+        baseStack.print();
+        System.out.println("size:"+baseStack.getSize());
     }
 
 }
