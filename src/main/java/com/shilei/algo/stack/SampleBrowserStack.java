@@ -11,7 +11,7 @@ public class SampleBrowserStack {
     /**
      * 当前页面
      */
-    private String cuurentPage;
+    private String currentPage;
     /**
      * 存放后退页面栈
      */
@@ -56,10 +56,10 @@ public class SampleBrowserStack {
     public String goBack(){
         String page;
         if(canGoBack()){
-            // 1.从后退栈中弹出一个
+            // 1.将当前页面存放到前进栈中
+            forwarStack.push(currentPage);
+            // 2.从后退栈中弹出一个节点作为当前页面
             page = backStack.pop();
-            // 2.将弹出来的页面村粗到前进栈中
-            forwarStack.push(page);
             showPage(page," back ");
             return page;
         }
@@ -75,10 +75,10 @@ public class SampleBrowserStack {
     public String goForward(){
         String page;
         if(canGoForward()){
-            // 1.从前进栈中弹出页面
+            // 1.将当前页面存放到后退栈中
+            backStack.push(currentPage);
+            // 2.从前进栈中弹出页面作为当前页面
             page = forwarStack.pop();
-            // 2.弹出的页面存放到后退栈中
-            backStack.push(page);
             showPage(page," forward ");
             return page;
         }
@@ -92,17 +92,23 @@ public class SampleBrowserStack {
      * @return
      */
     public String open(String page){
-        // 1.新打开的页面新存放到后退栈中
-        backStack.push(page);
-        // 2.前进栈则需要清空，因为新页面不会有前进页面
-        forwarStack.clear();
+        if(this.currentPage != null){
+            // 1.将当前页面新存放到后退栈中
+            backStack.push(this.currentPage);
+            // 2.前进栈则需要清空，因为新页面不会有前进页面
+            forwarStack.clear();
+        }
         showPage(page," open ");
         return page;
     }
 
     public void showPage(String page,String msg){
         System.out.println(page + msg);
-        this.cuurentPage = page;
+        this.currentPage = page;
+    }
+
+    public void currentPage(){
+        System.out.println("currentPage is :"+currentPage);
     }
 
     public static void main(String[] args) {
@@ -111,39 +117,47 @@ public class SampleBrowserStack {
         sampleBrowserStack.open("2");
         sampleBrowserStack.open("3");
         sampleBrowserStack.open("4");
-
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.getBackStack().print();
         sampleBrowserStack.getForwarStack().print();
 
         System.out.println("======================");
         sampleBrowserStack.goBack();
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.getBackStack().print();
         sampleBrowserStack.getForwarStack().print();
 
         System.out.println("======================");
         sampleBrowserStack.goBack();
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.getBackStack().print();
         sampleBrowserStack.getForwarStack().print();
 
         System.out.println("======================");
         sampleBrowserStack.goForward();
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.getBackStack().print();
         sampleBrowserStack.getForwarStack().print();
 
         System.out.println("======================");
         sampleBrowserStack.open("5");
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.getBackStack().print();
         sampleBrowserStack.getForwarStack().print();
 
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.goForward();
         sampleBrowserStack.goForward();
 
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.goBack();
         sampleBrowserStack.goBack();
         sampleBrowserStack.goBack();
+        sampleBrowserStack.currentPage();
         sampleBrowserStack.goBack();
         sampleBrowserStack.goBack();
         sampleBrowserStack.goBack();
+        sampleBrowserStack.currentPage();
 
         sampleBrowserStack.getBackStack().print();
         sampleBrowserStack.getForwarStack().print();
