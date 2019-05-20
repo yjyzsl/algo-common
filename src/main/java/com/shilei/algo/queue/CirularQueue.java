@@ -55,9 +55,15 @@ public class CirularQueue<E> {
         if(tail == head){
             System.out.println("elementData is empty. ----head:"+head+",tail:"+tail);
         }
-//        for(int i=0; i<(); i++){
-//            System.out.print(elementData[i]+",");
-//        }
+        int size = tail - head;
+        if(size < 0){// 计算队列节点数量
+            size = tail + capacity - head;
+        }
+        int index;
+        for(int i=0; i<size; i++){
+            index = (head + i)%capacity;
+            System.out.print(elementData[index]+",");
+        }
         System.out.println("----head:"+head+",tail:"+tail);
     }
 
