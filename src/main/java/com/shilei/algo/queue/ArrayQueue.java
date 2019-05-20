@@ -88,7 +88,7 @@ public class ArrayQueue<E> {
     }
 
     public void print(){
-        if(tail == -1){
+        if(tail == head){
             System.out.println("elementData is empty. ----head:"+head+",tail:"+tail);
         }
         for(int i=head; i<tail; i++){
