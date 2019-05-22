@@ -45,6 +45,8 @@ public class LinkedQueue<E> {
         Node<E> next = head.next;
         if(next != null){
             next.prev = null;
+        }else{// 已经队头和队尾指向一个元素了
+            tail = next;
         }
         E value = head.value;
         head.next = null;
@@ -61,7 +63,7 @@ public class LinkedQueue<E> {
             System.out.print(node.value+",");
             node = node.next;
         }
-        System.out.println();
+        System.out.println("  print");
     }
 
     private void reversePrint(){
@@ -73,7 +75,7 @@ public class LinkedQueue<E> {
             System.out.print(node.value+",");
             node = node.prev;
         }
-        System.out.println();
+        System.out.println("  reversePrint");
     }
 
 
@@ -132,9 +134,9 @@ public class LinkedQueue<E> {
 
         linkedQueue.poll();
         linkedQueue.poll();
-        linkedQueue.poll();
-        linkedQueue.poll();
-        linkedQueue.poll();
+        linkedQueue.print();
+        linkedQueue.reversePrint();
+
         linkedQueue.poll();
         linkedQueue.print();
         linkedQueue.reversePrint();
