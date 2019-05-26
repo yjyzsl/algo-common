@@ -101,6 +101,7 @@ public class SkipList<E extends Comparable<? super E>> {
             newNode.fowward[i] = prevNodes[i].fowward[i];
             prevNodes[i].fowward[i] = newNode;
         }
+        size++;
         return true;
     }
 
@@ -115,13 +116,12 @@ public class SkipList<E extends Comparable<? super E>> {
         }
         SkipNode<E> skipNode = head;
         for(int i = level-1; i >= 0; i--){
-            while (skipNode.fowward[i] != null && skipNode.fowward[i].value.compareTo(value) <= 0){
+            while (skipNode.fowward[i] != null && skipNode.fowward[i].value.compareTo(value) < 0){//找到最后一个小于给定值的前驱节点
                 skipNode = skipNode.fowward[i];
             }
-            if(skipNode != null && value.equals(skipNode.value)){
-                return skipNode;
-            }else{
-                return null;
+            // 前驱节点的后继指针指向的节点就是第一个大于等于给定值的节点
+            if(skipNode.fowward[i] != null && value.equals(skipNode.fowward[i].value)){
+                return skipNode.fowward[i];
             }
         }
         return null;
@@ -163,6 +163,7 @@ public class SkipList<E extends Comparable<? super E>> {
             prevNodes[i].fowward[i] = currSkipNode.fowward[i];
             currSkipNode.fowward[i] = null;
         }
+        size--;
         return currSkipNode;
     }
 
@@ -183,11 +184,24 @@ public class SkipList<E extends Comparable<? super E>> {
     }
 
     public void printAll(){
-        SkipNode skipNode = head.fowward[0];
-        while (skipNode != null){
-            System.out.print(skipNode+"  ,  ");
-            skipNode = skipNode.fowward[0];
+        SkipNode skipNode = head;
+        for(int i = level-1; i >= 0; i--){
+            skipNode = head;
+//            while (skipNode != null){
+//                System.out.print(i+":"+skipNode.value+"  ");
+//                skipNode = skipNode.fowward[i];
+//            }
+            for(int j = 0; j <= size; j++){
+                if(skipNode != null){
+                    System.out.print(i+":"+skipNode.value+"  ");
+                    skipNode = skipNode.fowward[i];
+                }else{
+                    System.out.print(i+":   ");
+                }
+            }
+            System.out.println();
         }
+
         System.out.println();
     }
 
@@ -224,20 +238,21 @@ public class SkipList<E extends Comparable<? super E>> {
         skipList.insert(2);
         skipList.insert(3);
         skipList.insert(6);
-        skipList.insert(4);
+        skipList.insert(10);
 
-        skipList.printAll();
 
-        skipList.insert(3);
+        //skipList.insert(3);
         skipList.insert(1);
+        System.out.println("size:"+skipList.size);
         skipList.printAll();
 
         System.out.println("find(3):"+skipList.find(3));
-        System.out.println("find(6):"+skipList.find(6));
+        System.out.println("find(8):"+skipList.find(8));
         System.out.println("find(7):"+skipList.find(7));
 
         System.out.println("remove(3):"+skipList.remove(3));
         skipList.printAll();
+        System.out.println("size:"+skipList.size);
         System.out.println("find(3):"+skipList.find(3));
 
         System.out.println("remove(1):"+skipList.remove(1));
