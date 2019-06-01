@@ -9,6 +9,8 @@ package com.shilei.algo.sorts;
  **/
 public class QuickSort {
 
+    static  int counting = 0;
+
 
     public static void quickSort(int[] a, int l, int r) {
         if (l >= r) {
@@ -36,7 +38,13 @@ public class QuickSort {
         }
         int pivot = a[r];
         int i = l, tmp;
-        for (int j = l; j < r; j++) {
+//        while(i <= r && a[i] < pivot){//有序度和逆序度之和等于总的比较次数，一个组数据的总比较次数是固定的
+//            counting++;
+//            i++;
+//        }
+//        System.out.println("i:"+i);
+        for (int j = i; j < r; j++) {
+            counting++;
             if (a[j] < pivot) {// i下标左边的节点值都小于pivot，当找到一个a[j]<pivot时则交换i,j位置的元素，然后i位置后移，则i左边的元素都小于pivot
                 tmp = a[j];
                 a[j] = a[i];
@@ -57,6 +65,7 @@ public class QuickSort {
             System.out.print(a[i] + ",");
         }
         System.out.println();
+        System.out.println("counting:"+counting);
     }
 
 
