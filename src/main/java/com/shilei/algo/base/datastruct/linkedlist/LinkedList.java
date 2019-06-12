@@ -1,4 +1,4 @@
-package com.shilei.algo.linkedlist;
+package com.shilei.algo.base.datastruct.linkedlist;
 
 /**
  * @Description: 基于链表实现一个功能

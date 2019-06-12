@@ -1,4 +1,4 @@
-package com.shilei.algo.search;
+package com.shilei.algo.base.search;
 
 /**
  * @Description: 二分查找

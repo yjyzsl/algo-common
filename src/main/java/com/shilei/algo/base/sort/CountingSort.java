@@ -1,4 +1,4 @@
-package com.shilei.algo.sorts;
+package com.shilei.algo.base.sort;
 
 /**
  * @Description: 计数排序

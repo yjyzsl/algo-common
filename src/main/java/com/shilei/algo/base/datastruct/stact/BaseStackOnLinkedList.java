@@ -1,4 +1,4 @@
-package com.shilei.algo.stack;
+package com.shilei.algo.base.datastruct.stact;
 
 /**
  *

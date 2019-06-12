@@ -1,4 +1,4 @@
-package com.shilei.algo.heap;
+package com.shilei.algo.base.datastruct.heap;
 
 /**
  * @Description 堆

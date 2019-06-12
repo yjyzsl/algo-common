@@ -1,4 +1,4 @@
-package com.shilei.algo.bitmap;
+package com.shilei.algo.base.datastruct.bitmap;
 
 /**
  * @Description 位图

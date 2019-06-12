@@ -1,4 +1,4 @@
-package com.shilei.algo.skiplist;
+package com.shilei.algo.base.datastruct.skipList;
 
 import java.util.Random;
 

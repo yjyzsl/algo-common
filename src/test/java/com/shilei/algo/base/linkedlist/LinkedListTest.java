@@ -1,5 +1,6 @@
-package com.shilei.algo.linkedlist;
+package com.shilei.algo.base.linkedlist;
 
+import com.shilei.algo.base.datastruct.linkedlist.LinkedList;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;

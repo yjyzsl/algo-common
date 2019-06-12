@@ -1,4 +1,4 @@
-package com.shilei.algo.sorts;
+package com.shilei.algo.base.sort;
 
 /**
  * @Description: 冒泡排序、插入排序、选择排序

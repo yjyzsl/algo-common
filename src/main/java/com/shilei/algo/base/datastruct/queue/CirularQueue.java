@@ -1,4 +1,4 @@
-package com.shilei.algo.queue;
+package com.shilei.algo.base.datastruct.queue;
 
 /**
  * @Description: 基于数组实现循环队列
