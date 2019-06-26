@@ -101,7 +101,7 @@ public class HashOpenAddressing {
 
     public int hash(int hashCode){
         // capacity为2的指数
-        return hashCode & capacity;
+        return hashCode % capacity;
     }
 
 }
