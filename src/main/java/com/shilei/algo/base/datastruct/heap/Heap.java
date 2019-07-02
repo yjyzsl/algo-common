@@ -1,7 +1,7 @@
 package com.shilei.algo.base.datastruct.heap;
 
 /**
- * @Description 堆
+ * @Description 堆,大顶堆的实现
  * 1.堆是一个完全二叉树
  * 2.堆中每一个节点都大于等于(或小于等于)其子树上的所有节点
  * 时间复杂度为O(nlogn),属于原地排序,不稳定

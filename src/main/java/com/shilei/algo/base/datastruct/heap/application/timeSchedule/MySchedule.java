@@ -16,6 +16,8 @@ public class MySchedule {
 
     private PriorityQueue<ScheduleJob> priorityQueue;
 
+    private Thread mainThread;
+
     public MySchedule(){
         priorityQueue = new PriorityQueue<>(8,(o1,o2) ->{
             if(o1.getRunTime() > o2.getRunTime()){
@@ -32,32 +34,37 @@ public class MySchedule {
      * 启动定时任务
      */
     public void start(){
-        while (true){
-            try {
-                ScheduleJob scheduleJob = priorityQueue.poll();
-                if(scheduleJob == null){
-                    Thread.sleep(100);
-                    continue;
-                }
-                long runTime = scheduleJob.getRunTime();
-                long curTime = System.currentTimeMillis();
-                long awitTime = curTime - runTime;
-                if(awitTime > 0){// 还有到指定时间,等待awitTime后在运行
-                    Thread.sleep(awitTime);
-                }
-                Runnable task = scheduleJob.getRunTask();
-                task.run();
-                // 执行完后有将任务放入队列
-                curTime = System.currentTimeMillis();
-                scheduleJob.setRunTime(scheduleJob.getDelay()+curTime);
+        mainThread = new Thread(() -> {
+            while (true){
+                try {
+                    ScheduleJob scheduleJob = priorityQueue.poll();
+                    if(scheduleJob == null){
+                        System.out.println("priority queue is empty...");
+                        Thread.sleep(100);
+                        continue;
+                    }
+                    long runTime = scheduleJob.getRunTime();
+                    long curTime = System.currentTimeMillis();
+                    long awitTime = runTime - curTime;
+                    if(awitTime > 0){// 还有到指定时间,等待awitTime后在运行
+                        Thread.sleep(awitTime);
+                    }
+                    Runnable task = scheduleJob.getRunTask();
+                    System.out.println("执行任务:"+scheduleJob);
+                    task.run();
+                    // 执行完后有将任务放入队列
+                    curTime = System.currentTimeMillis();
+                    scheduleJob.setRunTime(scheduleJob.getDelay()+curTime);
+                    // 执行完后重新放入队列
+                    priorityQueue.offer(scheduleJob);
 
-
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
-        }
+        });
+        mainThread.start();
     }
-
 
     /**
      * 延时执行定时任务
@@ -68,6 +75,8 @@ public class MySchedule {
         // 下一次运行的时间
         long runTime = System.currentTimeMillis()+delay;
         ScheduleJob scheduleJob = new ScheduleJob(runTime,task);
+        scheduleJob.setDelay(delay);
+        System.out.println("添加任务:"+scheduleJob);
         // 将任务放到队列中
         priorityQueue.offer(scheduleJob);
     }

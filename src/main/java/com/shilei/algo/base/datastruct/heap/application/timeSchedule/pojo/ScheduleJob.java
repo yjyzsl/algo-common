@@ -44,4 +44,13 @@ public class ScheduleJob {
     public void setDelay(long delay) {
         this.delay = delay;
     }
+
+    @Override
+    public String toString() {
+        return "ScheduleJob{" +
+                "delay=" + delay +
+                ", runTime=" + runTime +
+                ", runTask=" + runTask +
+                '}';
+    }
 }

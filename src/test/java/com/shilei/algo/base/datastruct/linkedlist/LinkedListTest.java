@@ -4,6 +4,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedHashMap;
+
 public class LinkedListTest {
 
     private LinkedList<LinkedList.User> linkedList;
@@ -169,6 +171,26 @@ public class LinkedListTest {
 
     }
 
+
+    /**
+     * 测试
+     */
+    @Test
+    public void testJdkLindedHashMap(){
+        LinkedHashMap<String,Object> linkedHashMap = new LinkedHashMap<String,Object>(16,0.75f,true);
+        linkedHashMap.put("1","a");
+        linkedHashMap.put("2","b");
+        linkedHashMap.put("3","c");
+        linkedHashMap.put("4","d");
+        linkedHashMap.put("5","e");
+        System.out.println(linkedHashMap);
+
+        linkedHashMap.put("3","cc");
+        System.out.println(linkedHashMap);
+
+        System.out.println(linkedHashMap.get("2"));
+        System.out.println(linkedHashMap);
+    }
 
 
 
