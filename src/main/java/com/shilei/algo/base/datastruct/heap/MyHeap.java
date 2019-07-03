@@ -1,33 +1,44 @@
 package com.shilei.algo.base.datastruct.heap;
 
+import java.util.Comparator;
+
 /**
- * @Description: 小顶堆实现
- * 堆中任意节点都比它的所有子节点要都小
+ * @Description: 堆实现
+ * 默认小顶堆,堆中任意节点都比它的所有子节点要都小
  * @Author: shilei
  * @Date: 2019/7/2 20:40
  **/
-public class MinHeap<E extends Comparable> {
+public class MyHeap<E extends Comparable> {
 
     private Object[] queue;
 
     // 堆容量
     private int capacity;
 
+    private Comparator<? super E> comparator;
+
     private int size;
 
     private static final int DEFAULT_CAPACITY = 10;
 
-    public MinHeap(){
+    public MyHeap(){
         this(DEFAULT_CAPACITY);
     }
 
-    public MinHeap(int capacity){
+    public MyHeap(int capacity, Comparator<? super E> comparator) {
+        this(capacity);
+        this.comparator = comparator;
+    }
+
+    public MyHeap(int capacity){
         this.capacity = capacity;
         queue = new Object[capacity+1];
         size = 0;
     }
 
-    public MinHeap(Object[] queue){
+
+
+    public MyHeap(Object[] queue){
         this.capacity = queue.length-1;
         this.queue = queue;
         this.size = capacity;
@@ -45,13 +56,35 @@ public class MinHeap<E extends Comparable> {
         }
     }
 
+    /**
+     * 使用之定义比较器
+     * @param n
+     * @param i
+     */
+    public void siftUpUsingComparator(int n,int i){
+        int k;
+        while(true){
+            k = i;
+            if(2*i <= n && queue[2*i] != null && comparator.compare((E)queue[2*i],(E)queue[i]) < 0){// 左子节点小于父节点,将小节点记录为k
+                k = 2*i;
+            }
+            if(2*i+1 <= n && queue[2*i+1] != null && comparator.compare((E)queue[2*i+1],(E)queue[k]) < 0){// 将最小的节点与右节点比较,记录最小的节点
+                k = 2*i+1;
+            }
+            if(i == k){// 当i=k时说明该节点比子节点都小，不需要在进行堆化了
+                break;
+            }
+            swap(queue,k,i);
+            i = k;
+        }
+    }
 
     /**
-     * 从上往下进行堆化
-     * @param n 堆化到第n个下标是结束
-     * @param i 从第i个下标开始进行堆化
+     * 使用元素本身的比较器
+     * @param n
+     * @param i
      */
-    public void heapify(int n,int i){
+    public void siftUpComparable(int n,int i){
         int k;
         while(true){
             k = i;
@@ -69,7 +102,20 @@ public class MinHeap<E extends Comparable> {
         }
     }
 
-    public boolean offer(Object v){
+    /**
+     * 从上往下进行堆化
+     * @param n 堆化到第n个下标是结束
+     * @param i 从第i个下标开始进行堆化
+     */
+    public void heapify(int n,int i){
+        if(null == comparator){
+            siftUpComparable(n,i);
+        }else{
+            siftUpUsingComparator(n,i);
+        }
+    }
+
+    public boolean offer(E v){
         if(size > capacity){
             System.out.println(String.format("insert [%s] array is full."));
             return false;
@@ -79,10 +125,18 @@ public class MinHeap<E extends Comparable> {
         // 从下自上堆化
         int i = size;
         while(true){
-            if(i > 1 && ((E)queue[i]).compareTo(queue[i/2]) < 0){// 比父节点小,则交换
-                swap(queue,i,i/2);
+            if(null == comparator){
+                if(i > 1 && ((E)queue[i]).compareTo(queue[i/2]) < 0){// 比父节点小,则交换
+                    swap(queue,i,i/2);
+                }else{
+                    break;
+                }
             }else{
-                break;
+                if(i > 1 && comparator.compare((E)queue[i],(E)queue[i/2]) < 0){// 比父节点小,则交换
+                    swap(queue,i,i/2);
+                }else{
+                    break;
+                }
             }
             i = i/2;
         }
@@ -100,10 +154,18 @@ public class MinHeap<E extends Comparable> {
             return queue[1] == null ? null : (E)queue[1];
         }else{// 对顶已经满了
             E top = (E)queue[1];
-            if(top.compareTo(v) < 0){// 堆顶元素比新增元素小,将新元素插入，并且堆化
-                queue[1] = v;
-                heapify(size,1);
-                v = top;
+            if(null == comparator ){
+                if(top.compareTo(v) < 0){// 堆顶元素比新增元素小,将新元素插入，并且堆化
+                    queue[1] = v;
+                    heapify(size,1);
+                    v = top;
+                }
+            }else{
+                if(comparator.compare(top,v) < 0){// 堆顶元素比新增元素小,将新元素插入，并且堆化
+                    queue[1] = v;
+                    heapify(size,1);
+                    v = top;
+                }
             }
             // 返回较小的元素
             return v;
@@ -148,12 +210,12 @@ public class MinHeap<E extends Comparable> {
      * 查看头节点
      * @return
      */
-    public Object peek(){
+    public E peek(){
         if(size == 0){
             return null;
         }
         Object result = queue[1];
-        return result;
+        return result == null ? null : (E)result;
     }
 
     public int getSize(){
@@ -167,7 +229,11 @@ public class MinHeap<E extends Comparable> {
     }
 
     public void print(){
-        for(int i=0; i<queue.length; i++){
+        System.out.println("size:"+size);
+        for(int i=1; i<queue.length; i++){
+//            if(null == queue[i]){
+//                continue;
+//            }
             System.out.print(queue[i]+",");
         }
         System.out.println();
@@ -183,10 +249,10 @@ public class MinHeap<E extends Comparable> {
 
     public static void main(String[] args) {
         Object[] queue = new Object[]{0,3,5,1,4,12,8,6,10,2,11};
-        MinHeap minHeap = new MinHeap(10);
+        MyHeap minHeap = new MyHeap(10);
 
         minHeap.buildHeap(queue);
-        MinHeap.print(queue,queue.length-1);
+        MyHeap.print(queue,queue.length-1);
 
         minHeap.offer(3);
         minHeap.offer(5);

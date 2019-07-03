@@ -1,6 +1,6 @@
 package com.shilei.algo.base.datastruct.heap.application.topK;
 
-import com.shilei.algo.base.datastruct.heap.MinHeap;
+import com.shilei.algo.base.datastruct.heap.MyHeap;
 
 /**
  * @Description:
@@ -9,12 +9,12 @@ import com.shilei.algo.base.datastruct.heap.MinHeap;
  **/
 public class TopK {
 
-    private MinHeap minHeap;
+    private MyHeap minHeap;
 
     private int k;
 
     public TopK(int k){
-        this.minHeap = new MinHeap(k);
+        this.minHeap = new MyHeap(k);
         this.k = k;
     }
 

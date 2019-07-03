@@ -1,6 +1,6 @@
 package com.shilei.algo.base.datastruct.heap.application.mergeSmallFile;
 
-import com.shilei.algo.base.datastruct.heap.MinHeap;
+import com.shilei.algo.base.datastruct.heap.MyHeap;
 import com.shilei.algo.base.datastruct.heap.application.mergeSmallFile.pojo.FileInputPojo;
 import com.shilei.algo.base.datastruct.heap.application.mergeSmallFile.pojo.FileOutputPojo;
 
@@ -19,7 +19,7 @@ public class FileMergeManager {
 
     private FileOutputPojo fileOutputPojo;
 
-    private MinHeap<String> minHeap;
+    private MyHeap<String> minHeap;
 
     // 已完成文件合并的集合
     private Set<FileInputPojo> finishSet;
@@ -42,7 +42,7 @@ public class FileMergeManager {
             System.out.println(String.format("i[%s] file [%s]",i,childFile));
         }
         fileOutputPojo = FileOutputService.INSTANCE.openOutputFile(outPath);
-        minHeap = new MinHeap<>(length);
+        minHeap = new MyHeap<>(length);
         finishSet = new HashSet<>();
         System.out.println("init finish.");
     }
