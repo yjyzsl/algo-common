@@ -19,19 +19,20 @@ public class TopK {
     }
 
     public void insert(int v){
-        int count = minHeap.getCount();
-        if(k > count){
+        int size = minHeap.getSize();
+        if(k > size){
             // 继续插入
-            minHeap.insert(v);
+            minHeap.offer(v);
         }else{// 堆已经达到k个元素
             // 1.判断顶元素是否小于新插入的元素
-            int rootNode = minHeap.getRootNode();
+            Comparable rootNode = (Comparable)minHeap.peek();
             // 2.如果是将堆顶元素替换成新元素
-            if(rootNode < v){
-                minHeap.replaceRoot(v);
+            if(rootNode.compareTo(v) < 0){
+                rootNode = v;
+                // 3.移除头节点
+                Object oldFirst = minHeap.replaceFirst(rootNode);
+                System.out.println(String.format("oldFirst:%s , newFirst:%s",oldFirst,v));
             }
-            // 3.从上至下进行堆化
-            minHeap.heapify(k,1);
         }
     }
 

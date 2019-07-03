@@ -6,14 +6,14 @@ package com.shilei.algo.base.datastruct.heap;
  * @Author: shilei
  * @Date: 2019/7/2 20:40
  **/
-public class MinHeap {
+public class MinHeap<E extends Comparable> {
 
-    int[] a;
+    private Object[] queue;
 
     // 堆容量
     private int capacity;
 
-    private int count;
+    private int size;
 
     private static final int DEFAULT_CAPACITY = 10;
 
@@ -23,23 +23,23 @@ public class MinHeap {
 
     public MinHeap(int capacity){
         this.capacity = capacity;
-        a = new int[capacity+1];
-        count = 0;
+        queue = new Object[capacity+1];
+        size = 0;
     }
 
-    public MinHeap(int[] a){
-        this.capacity = a.length-1;
-        this.a = a;
-        this.count = capacity;
+    public MinHeap(Object[] queue){
+        this.capacity = queue.length-1;
+        this.queue = queue;
+        this.size = capacity;
     }
 
     public void buildHeap(){
-        this.buildHeap(a);
+        this.buildHeap(queue);
     }
 
     // 建堆
-    public void buildHeap(int a[]){
-        int n = a.length-1;
+    public void buildHeap(Object[] queue){
+        int n = queue.length-1;
         for(int i=n/2; i>0; i--){
             heapify(n,i);
         }
@@ -55,32 +55,32 @@ public class MinHeap {
         int k;
         while(true){
             k = i;
-            if(2*i <= n && a[2*i] < a[i]){// 左子节点小于父节点,将小节点记录为k
+            if(2*i <= n && queue[2*i] != null && ((E)queue[2*i]).compareTo(queue[i]) < 0){// 左子节点小于父节点,将小节点记录为k
                 k = 2*i;
             }
-            if(2*i+1 <= n && a[2*i+1] < a[k]){// 将最小的节点与右节点比较,记录最小的节点
+            if(2*i+1 <= n && queue[2*i+1] != null && ((E)queue[2*i+1]).compareTo(queue[k]) < 0){// 将最小的节点与右节点比较,记录最小的节点
                 k = 2*i+1;
             }
             if(i == k){// 当i=k时说明该节点比子节点都小，不需要在进行堆化了
                 break;
             }
-            swap(a,k,i);
+            swap(queue,k,i);
             i = k;
         }
     }
 
-    public boolean insert(int v){
-        if(count > capacity){
+    public boolean offer(Object v){
+        if(size > capacity){
             System.out.println(String.format("insert [%s] array is full."));
             return false;
         }
         // 插入到数据末尾
-        a[++count] = v;
+        queue[++size] = v;
         // 从下自上堆化
-        int i = count;
+        int i = size;
         while(true){
-            if(i > 1 && a[i] < a[i/2]){// 比父节点小,则交换
-                swap(a,i,i/2);
+            if(i > 1 && ((E)queue[i]).compareTo(queue[i/2]) < 0){// 比父节点小,则交换
+                swap(queue,i,i/2);
             }else{
                 break;
             }
@@ -89,56 +89,121 @@ public class MinHeap {
         return true;
     }
 
-    public int getRootNode(){
-        return a[1];
+    /**
+     * 添加数据，当比堆顶大时则插入堆中，并返回对顶元素
+     * 当比堆顶小时直接返回原数据
+     * @return
+     */
+    public E offerOrReplace(E v){
+        if(size < capacity){
+            offer(v);
+            return queue[1] == null ? null : (E)queue[1];
+        }else{// 对顶已经满了
+            E top = (E)queue[1];
+            if(top.compareTo(v) < 0){// 堆顶元素比新增元素小,将新元素插入，并且堆化
+                queue[1] = v;
+                heapify(size,1);
+                v = top;
+            }
+            // 返回较小的元素
+            return v;
+        }
     }
 
-    public void replaceRoot(int v){
-        a[1] = v;
+    /**
+     * 弹出头节点
+     * @return
+     */
+    public E pollFirst(){
+        if(size == 0){
+            return null;
+        }
+        E result = queue[1] == null ? null : (E)queue[1];
+        // 将尾节点放到头节点
+        queue[1] = queue[size];
+        queue[size] = 0;
+        --size;
+        // 然后节点堆化
+        heapify(size,1);
+        return result;
     }
 
-    public int getCount(){
-        return count;
+    /**
+     * 替换头节点,并返回原头节点
+     * @param v
+     */
+    public Object replaceFirst(Object v){
+        if(size == 0){
+            return null;
+        }
+        Object oldFirst = queue[1];
+        // 替换头节点
+        queue[1] = v;
+        // 然后节点堆化
+        heapify(size,1);
+        return oldFirst;
     }
 
-    public void swap(int[] a,int i,int j){
-        int temp = a[i];
-        a[i] = a[j];
-        a[j] = temp;
+    /**
+     * 查看头节点
+     * @return
+     */
+    public Object peek(){
+        if(size == 0){
+            return null;
+        }
+        Object result = queue[1];
+        return result;
+    }
+
+    public int getSize(){
+        return size;
+    }
+
+    public void swap(Object[] queue,int i,int j){
+        Object temp = queue[i];
+        queue[i] = queue[j];
+        queue[j] = temp;
     }
 
     public void print(){
-        for(int i=0; i<a.length; i++){
-            System.out.print(a[i]+",");
+        for(int i=0; i<queue.length; i++){
+            System.out.print(queue[i]+",");
         }
         System.out.println();
     }
 
-    public static void print(int[] a,int n){
+    public static void print(Object[] queue,int n){
         for(int i=0; i<=n; i++){
-            System.out.print(a[i]+",");
+            System.out.print(queue[i]+",");
         }
         System.out.println();
     }
 
 
     public static void main(String[] args) {
-        int[] a = new int[]{0,3,5,1,4,12,8,6,10,2,11};
+        Object[] queue = new Object[]{0,3,5,1,4,12,8,6,10,2,11};
         MinHeap minHeap = new MinHeap(10);
 
-        minHeap.buildHeap(a);
-        MinHeap.print(a,a.length-1);
+        minHeap.buildHeap(queue);
+        MinHeap.print(queue,queue.length-1);
 
-        minHeap.insert(3);
-        minHeap.insert(5);
-        minHeap.insert(1);
-        minHeap.insert(4);
-        minHeap.insert(12);
-        minHeap.insert(8);
-        minHeap.insert(6);
-        minHeap.insert(10);
-        minHeap.insert(2);
-        minHeap.insert(11);
+        minHeap.offer(3);
+        minHeap.offer(5);
+        minHeap.offer(1);
+        minHeap.offer(4);
+        minHeap.offer(12);
+        minHeap.offer(8);
+        minHeap.offer(6);
+        minHeap.offer(10);
+        minHeap.offer(2);
+        minHeap.offer(11);
+        minHeap.print();
+
+        minHeap.pollFirst();
+        minHeap.print();
+
+        minHeap.pollFirst();
         minHeap.print();
 
     }
