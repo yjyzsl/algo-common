@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class Node<K extends Comparable<? super K>,V> {
 
     /** 默认节点容量 */
-    private static final int DEFAULT_BRANCHING_FACTOR = 4;
+    protected static final int DEFAULT_BRANCHING_FACTOR = 4;
     /** 父节点 */
     protected Node parent;
     /** 关键字列表 */
@@ -51,6 +51,40 @@ public abstract class Node<K extends Comparable<? super K>,V> {
     }
 
     /**
+     * 将分裂的两个节点设置到父节点上
+     * @param curNode
+     * @param rightBrother
+     */
+    protected void propogate(Node<K,V> curNode,Node<K,V> rightBrother){
+        // 父节点为空
+        if(null == this.parent){
+            // 生成父节点
+            InternalNode parentNode = new InternalNode();
+            parentNode.keys.add(rightBrother.getFirstKey());
+            // 将本节点和右兄弟添加父节点几的孩子列表中
+            parentNode.children.add(curNode);
+            parentNode.children.add(rightBrother);
+
+            // 孩子节点指向父节点
+            this.parent = parentNode;
+            //rightBrother.parent = parentNode;
+        }else{// 父节点不为空
+            // 先将右兄弟和关键字插入到父节点
+            InternalNode parentNode = (InternalNode)this.parent;
+            parentNode.keys.add(rightBrother.getFirstKey());
+            parentNode.children.add(rightBrother);
+
+            // 判断父节点是否已满
+            if(parentNode.isFull()){
+                // 父节点满了则分裂
+                parentNode.split();
+            }
+        }
+        // 右兄弟设置父节点
+        rightBrother.parent = this.parent;
+    }
+
+    /**
      * 插入一个值,并返回根节点
      * @param key
      * @param value
@@ -68,6 +102,8 @@ public abstract class Node<K extends Comparable<? super K>,V> {
      * @return
      */
     protected abstract K getFirstKey();
+
+    protected abstract Node<K,V> getFirstNode();
 
     @Override
     public String toString() {

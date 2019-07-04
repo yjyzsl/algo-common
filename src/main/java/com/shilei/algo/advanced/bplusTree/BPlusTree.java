@@ -19,29 +19,45 @@ public class BPlusTree<K extends Comparable<? super K>,V> {
     public static void main(String[] args) {
 
         Node<Integer,String> root = new LeafNode<>();
-        root = root.insertValue(1,"a");
-        System.out.println(String.format("root:%S",root));
-        root = root.insertValue(3,"b");
-        System.out.println(String.format("root:%S",root));
-        root = root.insertValue(2,"c");
-        System.out.println(String.format("root:%S",root));
-        root = root.insertValue(6,"d");
-        System.out.println(String.format("root:%S",root));
-        root = root.insertValue(5,"e");
+//        root = root.insertValue(1,"1");
+//        System.out.println(String.format("root:%S",root));
+//        root = root.insertValue(2,"2");
+//        System.out.println(String.format("root:%S",root));
+//        root = root.insertValue(3,"3");
+//        System.out.println(String.format("root:%S",root));
+//        root = root.insertValue(4,"4");
+//        System.out.println(String.format("root:%S",root));
+//        root = root.insertValue(5,"5");
+//        System.out.println(String.format("root:%S",root));
+//
+//        root = root.insertValue(6,"6");
+//        System.out.println(String.format("root:%S",root));
+//
+//        root = root.insertValue(7,"7");
+//        root = root.insertValue(8,"8");
+//        root = root.insertValue(9,"9");
+//        root = root.insertValue(10,"10");
+//        root = root.insertValue(11,"11");
+//        root = root.insertValue(12,"12");
+//        root = root.insertValue(13,"13");
+//        root = root.insertValue(14,"14");
+//        root = root.insertValue(15,"15");
+//        root = root.insertValue(16,"16");
+
+        for(int i=1; i<=50; i++){
+            root = root.insertValue(i,String.valueOf(i));
+        }
+
         System.out.println(String.format("root:%S",root));
 
-        root = root.insertValue(7,"e");
-        root = root.insertValue(8,"e");
-        root = root.insertValue(9,"e");
-        root = root.insertValue(10,"e");
-        root = root.insertValue(11,"e");
-        root = root.insertValue(12,"e");
-        root = root.insertValue(13,"e");
-        root = root.insertValue(14,"e");
-        root = root.insertValue(15,"e");
-        root = root.insertValue(16,"e");
+        System.out.println("===================================");
+        LeafNode node = (LeafNode)root.getFirstNode();
+        System.out.println("FirstNode:"+node);
 
-        System.out.println(String.format("root:%S",root));
+        while (node != null){
+            System.out.println(node.values);
+            node = node.next;
+        }
 
     }
 

@@ -18,6 +18,7 @@ public class BPlusTreeTest {
     public void testBinarySearch(){
         Integer[] arr = new Integer[]{1,4,6,7,8,10,15};
         List<Integer> list = new ArrayList<>(Arrays.asList(arr));
+        System.out.println(String.format("0 binarySearch %s , position:%s",0,Collections.binarySearch(list,0)));
         System.out.println(String.format("2 binarySearch %s , position:%s",6,Collections.binarySearch(list,6)));
         System.out.println(String.format("5 binarySearch %s , position:%s",10,Collections.binarySearch(list,10)));
         System.out.println(String.format("7 binarySearch %s , position:%s",12,Collections.binarySearch(list,12)));

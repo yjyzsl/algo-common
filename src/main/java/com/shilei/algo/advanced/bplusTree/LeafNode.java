@@ -20,14 +20,14 @@ public class LeafNode<K extends Comparable<? super K>,V> extends Node<K,V>{
 
     public LeafNode() {
         super();
-        this.keys = new ArrayList<>();
-        this.values = new ArrayList<>();
+        this.keys = new ArrayList<>(super.branchingFactor);
+        this.values = new ArrayList<>(super.branchingFactor);
     }
 
     public LeafNode(int branchingFactor){
         super(branchingFactor);
-        this.keys = new ArrayList<>();
-        this.values = new ArrayList<>();
+        this.keys = new ArrayList<>(branchingFactor);
+        this.values = new ArrayList<>(branchingFactor);
     }
 
     /**
@@ -42,29 +42,25 @@ public class LeafNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         int position = Collections.binarySearch(this.keys,key);
         // 大于等于0时说明位置说在关键字中已经找到，只需要替换原值，小于0时没有找到，在（-position - 1）位置插入新值即可
         int valueIndex =  position >= 0 ? position : -position - 1;
+
+        // 叶子节点关键字中能找到,则直接设置对应下标的值
         if(position >= 0){
             this.values.set(valueIndex,value);
         }else{// 新增关键字和值
             this.keys.add(valueIndex,key);
             this.values.add(valueIndex,value);
         }
-        if(this.isFull()){// 关键字已满需要分裂
+
+        // 关键字已满需要分裂
+        if(this.isFull()){
             // 右兄弟
-            LeafNode<K, V> rightBrother = (LeafNode)this.split();
-
-            // 生成父节点
-            InternalNode parentNode = new InternalNode();
-            parentNode.keys.add(rightBrother.getFirstKey());
-            // 将本节点和右兄弟添加父节点几的孩子列表中
-            parentNode.children.add(this);
-            parentNode.children.add(rightBrother);
-
-            // 孩子节点指向父节点
-            this.parent = parentNode;
-            rightBrother.parent = parentNode;
+            this.split();
         }
-        return this.parent;
+        return this.findRoot();
     }
+
+
+
 
     /**
      * 叶子节点分裂
@@ -82,16 +78,25 @@ public class LeafNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         System.out.println(String.format("leafnode 1 split my keys %s",this.keys));
         System.out.println(String.format("leafnode 1 split rightBrother keys %s",rightBrother.keys));
 
-        // 本节点指向右兄弟
+        // 本节点后继指针指向右兄弟
         this.next = rightBrother;
-
+        // 右兄弟前驱指针指向本节点
+        rightBrother.prev = this;
 
         this.keys.subList(startIndex,endIndex).clear();
         this.values.subList(startIndex,endIndex).clear();
         System.out.println(String.format("leafnode 2 split my keys %s",this.keys));
         System.out.println(String.format("leafnode 2 split rightBrother keys %s",rightBrother.keys));
 
+        // 将分裂的两个节点设置到父节点上
+        this.propogate(this,rightBrother);
+
         return rightBrother;
+    }
+
+    @Override
+    protected Node<K, V> getFirstNode() {
+        return this;
     }
 
     @Override
