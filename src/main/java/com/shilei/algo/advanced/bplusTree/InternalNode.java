@@ -27,10 +27,10 @@ public class InternalNode<K extends Comparable<? super K>,V> extends Node<K,V>{
 
     @Override
     protected Node<K,V> insertValue(K key, V value) {
+        // 根据关键字查找对应的孩子节点
         Node<K,V> child = getChild(key);
         // 添加到子节点中,并返回子节点的父亲节点
-        Node rootNode = child.insertValue(key,value);
-        System.out.println(String.format("child insertValue %s",rootNode));
+        child.insertValue(key,value);
 
         if(this.isFull()){
             this.split();
@@ -38,8 +38,30 @@ public class InternalNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         return this.findRoot();
     }
 
+    /**
+     * 删除指定key的关键字
+     * @return
+     */
+    @Override
+    protected V deleteValue(K key) {
+        return null;
+    }
+
+    /**
+     * 合并兄弟节点
+     * @param brother
+     */
+    @Override
+    protected void merge(Node<K, V> brother) {
+
+    }
+
+    /**
+     * 根据关键字查找对应的孩子节点
+     * @param key 关键字
+     * @return
+     */
     private Node<K,V> getChild(K key) {
-        Collections.binarySearch(this.keys,key);
         //1.查找key在关键字列表中的位置，集合中不存在则返回的为在keys中第一个小于key的为位置+1
         int position = Collections.binarySearch(this.keys,key);
         // 大于等于0时说明位置说在关键字中已经找到，index=0是存放的左孩子，右孩子的第一个key会放入到父节点关键字中
@@ -53,26 +75,42 @@ public class InternalNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         return children.get(childIndex);
     }
 
+    /**
+     * 节点满了,对节点进行分裂层两个节点
+     * 第(m+1)/2个节点作为父节点,(m+1)/2左边的为左孩子，(m+1)/2右边的为右孩子
+     * 分裂后的右兄弟的孩子刷新父亲节点
+     * @return 返回分裂后的右兄弟节点
+     */
     @Override
     protected Node<K, V> split() {
         // 创建右兄弟节点
-        InternalNode rightBrother = new InternalNode();
-        // 计算右孩子拷贝范围
-        int startIndex = (this.getKeySize()+1)/2 , endIndex = (this.getKeySize());
-        System.out.println(String.format("split getKeySize[%s] startIndex[%s] endIndex[%s]",this.getKeySize(),startIndex,endIndex));
-        rightBrother.keys.addAll(this.keys.subList(startIndex,endIndex));
-        rightBrother.children.addAll(this.children.subList(startIndex,this.children.size()));
+        InternalNode<K,V> rightBrother = new InternalNode<K,V>();
+        // 计算中间节点
+        int midIndex = (this.getKeySize()+1)/2;
 
-        System.out.println(String.format("internalNode 1 split my keys %s",this.keys));
-        System.out.println(String.format("internalNode 1 split rightBrother keys %s",rightBrother.keys));
+        rightBrother.keys.addAll(this.keys.subList(midIndex,this.keys.size()));
+        rightBrother.children.addAll(this.children.subList(midIndex,this.children.size()));
 
-        this.keys.subList(startIndex,endIndex).clear();
-        this.children.subList(startIndex,this.children.size()).clear();
+        // 将右兄弟的叶子节点的父节点指向右兄弟
+        List<Node<K,V>> rightChildren = rightBrother.children;
+        for(Node<K,V> child:rightChildren){
+            child.parent = rightBrother;
+        }
 
-        System.out.println(String.format("internalNode 2 split my keys %s",this.keys));
+        System.out.println(String.format("internalNode 1 split my keys %s",this.keys));        System.out.println(String.format("internalNode 1 split rightBrother keys %s",rightBrother.keys));
+
+        // 删除已经移动到右兄弟中的数据
+        this.keys.subList(midIndex,this.keys.size()).clear();
+        this.children.subList(midIndex,this.children.size()).clear();
+
+        // midIndex-1下标的数据作为父节点的关键字
+        K parentKey = keys.remove(midIndex-1);
+
+        System.out.println(String.format("internalNode 2 split my parentKey[%s] keys %s",parentKey,this.keys));
         System.out.println(String.format("internalNode 2 split rightBrother keys %s",rightBrother.keys));
 
-        this.propogate(this,rightBrother);
+        // 将分裂的两个节点设置到父节点上
+        this.propogate(parentKey,this,rightBrother);
 
         return rightBrother;
     }

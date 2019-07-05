@@ -45,6 +45,10 @@ public abstract class Node<K extends Comparable<? super K>,V> {
         return node;
     }
 
+    /**
+     * 判断关键字是否满了
+     * @return
+     */
     protected boolean isFull(){
         // 关键字个数最多为 maxSize - 1个
         return keys.size() >= branchingFactor;
@@ -52,26 +56,28 @@ public abstract class Node<K extends Comparable<? super K>,V> {
 
     /**
      * 将分裂的两个节点设置到父节点上
+     * @param parentKey 父节点关键字
      * @param curNode
      * @param rightBrother
      */
-    protected void propogate(Node<K,V> curNode,Node<K,V> rightBrother){
+    protected void propogate(K parentKey,Node<K,V> curNode,Node<K,V> rightBrother){
         // 父节点为空
         if(null == this.parent){
             // 生成父节点
             InternalNode parentNode = new InternalNode();
-            parentNode.keys.add(rightBrother.getFirstKey());
+            // 添加父节点key
+            parentNode.keys.add(parentKey);
             // 将本节点和右兄弟添加父节点几的孩子列表中
             parentNode.children.add(curNode);
             parentNode.children.add(rightBrother);
 
             // 孩子节点指向父节点
             this.parent = parentNode;
-            //rightBrother.parent = parentNode;
         }else{// 父节点不为空
             // 先将右兄弟和关键字插入到父节点
             InternalNode parentNode = (InternalNode)this.parent;
-            parentNode.keys.add(rightBrother.getFirstKey());
+            // 添加父节点key
+            parentNode.keys.add(parentKey);
             parentNode.children.add(rightBrother);
 
             // 判断父节点是否已满
@@ -90,6 +96,18 @@ public abstract class Node<K extends Comparable<? super K>,V> {
      * @param value
      */
     protected abstract Node<K,V> insertValue(K key,V value);
+
+    /**
+     * 删除指定key的关键字
+     * @return
+     */
+    protected abstract V deleteValue(K key);
+
+    /**
+     * 合并兄弟节点
+     * @param brother
+     */
+    protected abstract void merge(Node<K,V> brother);
 
     /**
      * 将当前节点分裂成两个节点，然后返回兄弟节点
