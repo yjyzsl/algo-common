@@ -7,14 +7,16 @@ import java.util.List;
  * @Author shil20
  * @Date 2019/7/4 9:37
  **/
-public abstract class Node<K extends Comparable<? super K>,V> {
+public abstract class Node<K extends Comparable<? super K>,V>{
 
-    /** 默认节点容量 */
-    protected static final int DEFAULT_BRANCHING_FACTOR = 4;
     /** 父节点 */
     protected Node parent;
     /** 关键字列表 */
     protected List<K> keys;
+
+    /** 默认节点容量 */
+    protected static final int DEFAULT_BRANCHING_FACTOR = 5;
+
     /** 节点容量，即最多多少个子节点 */
     protected int branchingFactor;
 
@@ -105,9 +107,8 @@ public abstract class Node<K extends Comparable<? super K>,V> {
 
     /**
      * 合并兄弟节点
-     * @param brother
      */
-    protected abstract void merge(Node<K,V> brother);
+    protected abstract void merge();
 
     /**
      * 将当前节点分裂成两个节点，然后返回兄弟节点
@@ -122,6 +123,21 @@ public abstract class Node<K extends Comparable<? super K>,V> {
     protected abstract K getFirstKey();
 
     protected abstract Node<K,V> getFirstNode();
+
+    /**
+     * 根据key查找指定的值
+     * @param key 查找关键字
+     * @return
+     */
+    protected abstract V getValue(K key);
+
+    /**
+     * 返回查找，查找key1到key2范围之间的数据
+     * @param key1
+     * @param key2
+     * @return
+     */
+    protected abstract List<V> getRange(K key1,K key2);
 
     @Override
     public String toString() {

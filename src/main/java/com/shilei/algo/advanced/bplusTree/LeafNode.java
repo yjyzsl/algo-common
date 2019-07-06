@@ -63,11 +63,11 @@ public class LeafNode<K extends Comparable<? super K>,V> extends Node<K,V>{
      * 删除指定key的关键字
      * 1.查看关键字中是否存在,存在执行第2步，否则返回空
      * 2.如果存在则获取指定的值,然后在删除对应的关键字和值
-     * 3.查看关键字数量是不是少于(m-1)/2-1个，如果是则需要向兄弟节点借执行第4步，否则不进行处理
-     * 4.向兄弟节点借，如果兄弟节点个数大于(m-1)/2-1个，则可以借，否则执行第5步
-     * 5.当被借的兄弟节点个数不大于(m-1)/2-1个时，当前节点和兄弟节点合并成一个节点(合并之后节点数还是小于m)，并删除父节点中的key
-     * 6.当前节点指向父节点，当父节点数大于等于(m-1)/2-1时，则删除操作结束，否则执行第7步
-     * 7.若兄弟节点有富余(大于等于（m-1）/2-1)，父节点下移，兄弟节点key上移，删除结束，否则执行第8步
+     * 3.查看关键字数量是不是少于(m/2)个，如果是则需要向兄弟节点借执行第4步，否则不进行处理
+     * 4.向兄弟节点借，如果兄弟节点个数大于(m/2)个，则可以借，否则执行第5步
+     * 5.当被借的兄弟节点个数不大于(m/2)个时，当前节点和兄弟节点合并成一个节点(合并之后节点数还是小于m)，并删除父节点中的key
+     * 6.6.当前节点指向父节点，当父节点数大于等于(m/2)时，则删除操作结束，否则执行第7步
+     * 7.若兄弟节点有富余(大于等于(m/2))，父节点下移，兄弟节点key上移，删除结束，否则执行第8步
      * 8.当前节点和兄弟节点以及父节点下移合成一个节点，将当前节点指向父节点，重复第6步
      * @return 返回关键字对应的值，不存在返回空
      */
@@ -84,37 +84,115 @@ public class LeafNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         System.out.println(String.format("deleteValue position[%s] , value[%s] , keys size[%s]",position,value,this.keys.size()));
         this.keys.remove(position);
 
-        // 3.查看关键字数量是不是少于(m-1)/2-1个，如果是则需要向兄弟节点借执行第4步，否则不进行处理
-        int mergeSize = (branchingFactor-1)/2 - 1;
+        // 3.查看关键字数量是不是少于(m/2)个，如果是则需要向兄弟节点借执行第4步，否则不进行处理
+        //int mergeSize = (branchingFactor-1)/2 - 1;
+        int mergeSize = branchingFactor/2;
         System.out.println(String.format("deleteValue mergeSize[%s]",mergeSize));
         if(this.keys.size() >= mergeSize){
             return value;
         }
+        // 合并兄弟节点
+        this.merge();
 
-        // 4.向兄弟节点借，如果兄弟节点个数大于(m-1)/2-1个，则可以借，否则执行第5步
-        LeafNode<K,V> brotherNode = this.next;
-        if(brotherNode == null){
-            // 只处理合并右兄弟节点
-            return value;
+        return value;
+    }
+
+    @Override
+    protected V getValue(K key) {
+        int position = Collections.binarySearch(keys,key);
+        if(position < 0){
+            return null;
         }
-        if(brotherNode.keys.size() > mergeSize){
+        return this.values.get(position);
+    }
 
+    @Override
+    protected List<V> getRange(K key1, K key2) {
+        int position = Collections.binarySearch(keys,key1);
+        if(position < 0){
+            position = -position - 1;
         }
-
-        // 5.当被借的兄弟节点个数不大于(m-1)/2-1个时，当前节点和兄弟节点合并成一个节点(合并之后节点数还是小于m)，并删除父节点中的key
-        // 6.当前节点指向父节点，当父节点数大于等于(m-1)/2-1时，则删除操作结束，否则执行第7步
-        // 7.若兄弟节点有富余(大于（m-1）/2-1)，父节点下移，兄弟节点key上移，删除结束，否则执行第8步
-        // 8.当前节点和兄弟节点以及父节点下移合成一个节点，将当前节点指向父节点，重复第6步
-        return null;
+        List<V> valueList = new ArrayList<>();
+        // 范围查找结束标志
+        boolean finishFlag = false;
+        for(int i=position; i<keys.size(); i++){
+            if(keys.get(i).compareTo(key2) <= 0){
+                valueList.add(values.get(i));
+            }else{
+                finishFlag = true;
+                break;
+            }
+        }
+        if(!finishFlag){
+            // 遍历下一个节点
+            LeafNode<K,V> nextNode = this.next;
+            while (nextNode != null){
+                for(int i=position; i<nextNode.keys.size(); i++){
+                    if(nextNode.keys.get(i).compareTo(key2) <= 0){
+                        valueList.add(nextNode.values.get(i));
+                    }else{
+                        break;
+                    }
+                }
+                nextNode = nextNode.next;
+            }
+        }
+        return valueList;
     }
 
     /**
      * 合并兄弟节点
-     * @param brother
      */
     @Override
-    protected void merge(Node<K, V> brother) {
+    protected void merge() {
 
+        // 4.向兄弟节点借，如果兄弟节点个数大于(m/2)个，则可以借，否则执行第5步
+        LeafNode<K,V> brotherNode = this.next;
+        if(brotherNode == null){
+            // 只处理合并右兄弟节点
+            return ;
+        }
+        //int mergeSize = (branchingFactor-1)/2 - 1;
+        int mergeSize = branchingFactor/2;
+        K moveKey = brotherNode.keys.get(0);
+        if(brotherNode.keys.size() > mergeSize) {
+            // 移除右兄弟的第一个数据
+            V moveValue = brotherNode.values.remove(0);
+            moveKey = brotherNode.keys.remove(0);
+            // 将数据添加到当前节点
+            this.keys.add(moveKey);
+            this.values.add(moveValue);
+        }else{
+            // 5.当被借的兄弟节点个数不大于(m/2)个时，当前节点和兄弟节点合并成一个节点(合并之后节点数还是小于m)，并删除父节点中的key
+            // 父节点中需要移除的key
+            this.keys.addAll(brotherNode.keys);
+            this.values.addAll(brotherNode.values);
+
+            // 删除父节点中的key
+            InternalNode<K,V> parentNode = (InternalNode)this.parent;
+
+            int movePosition = Collections.binarySearch(this.parent.keys,moveKey);
+            if(movePosition >= 0){
+                K removeKey = parentNode.keys.remove(movePosition);
+                Node removeNode = parentNode.children.remove(movePosition+1);
+                System.out.println(String.format("moveKey [%s] movePosition [%s] removeKey [%s] removeNode [%s]",moveKey,movePosition,removeKey,removeNode));
+            }else{
+                moveKey = this.keys.get(0);
+                movePosition = Collections.binarySearch(this.parent.keys,moveKey);
+                if(movePosition > 0){
+                    K removeKey = parentNode.keys.remove(movePosition-1);
+                    boolean removeNodeFlag = parentNode.children.remove(brotherNode);
+                    System.out.println(String.format("moveKey [%s] movePosition [%s] removeKey [%s] removeNodeFlag [%s]",moveKey,movePosition,removeKey,removeNodeFlag));
+                }
+            }
+            // 删除合并节点
+            deleteNode(brotherNode);
+
+            // 6.当前节点指向父节点，当父节点数大于等于(m/2)时，则删除操作结束，否则执行第7步
+            // 7.若兄弟节点有富余(大于（m/2)，父节点下移，兄弟节点key上移，删除结束，否则执行第8步
+            // 8.当前节点和兄弟节点以及父节点下移合成一个节点，将当前节点指向父节点，重复第6步
+            parentNode.merge();
+        }
     }
 
     /**
@@ -151,6 +229,30 @@ public class LeafNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         this.propogate(parentKey,this,rightBrother);
 
         return rightBrother;
+    }
+
+    /**
+     * 删除节点
+     * @param node
+     */
+    private void deleteNode(LeafNode<K,V> node){
+        node.keys.clear();
+        node.values.clear();
+        System.out.println(String.format("this.keys [%s] ---- brotherNode.keys [%s]",this.keys, node.keys));
+        System.out.println(String.format("this.values [%s] ---- brotherNode.values [%s]",this.values, node.values));
+        // 更新链表
+        if(null != node.prev){
+            node.prev.next = node.next;
+        }
+        if(null != node.next){
+            node.next.prev = node.prev;
+        }
+
+        node.keys = null;
+        node.values = null;
+        node.parent = null;
+        node.next = null;
+        node.prev = null;
     }
 
     @Override

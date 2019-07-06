@@ -44,16 +44,111 @@ public class InternalNode<K extends Comparable<? super K>,V> extends Node<K,V>{
      */
     @Override
     protected V deleteValue(K key) {
-        return null;
+        // 根据关键字查找对应的孩子节点
+        Node<K,V> child = getChild(key);
+        V value = child.deleteValue(key);
+        return value;
+    }
+
+
+    @Override
+    protected V getValue(K key) {
+        Node<K,V> child = getChild(key);
+        return child.getValue(key);
+    }
+
+    @Override
+    protected List<V> getRange(K key1, K key2) {
+        Node<K,V> child = getChild(key1);
+        List<V> valueList = child.getRange(key1,key2);
+        return valueList;
     }
 
     /**
      * 合并兄弟节点
-     * @param brother
+     *
+     * 6.当前节点指向父节点，当节点数大于等于m/2时，则删除操作结束，否则执行第7步
+     * 7.若兄弟节点有富余(大于等于m/2)，父节点下移，兄弟节点key上移，删除结束，否则执行第8步
+     * 8.当前节点和兄弟节点以及父节点下移合成一个节点，将当前节点指向父节点，重复第6步
      */
     @Override
-    protected void merge(Node<K, V> brother) {
+    protected void merge() {
+        //int mergeSize = (branchingFactor-1)/2 - 1;
+        int mergeSize = branchingFactor/2;
+        // 6.当前节点指向父节点，当节点数大于等于(m-1)/2-1时，则删除操作结束，否则执行第7步
+        if(this.keys.size() >= mergeSize){
+            return;
+        }
+        // 查找兄弟节点
+        InternalNode<K,V> brotherNode = findBrothNode();
+        if(null == brotherNode){
+            return;
+        }
+        InternalNode<K,V> parentNode = (InternalNode)this.parent;
+        K maxKey = this.keys.get(this.keys.size()-1);
+        // 计算法父节点索引下标
+        int pPosition = Collections.binarySearch(parentNode.keys,maxKey);
+        int moveParentKeyIndex = -pPosition - 1;
+        K moveParentKey = parentNode.keys.get(moveParentKeyIndex);
 
+        // 7.若兄弟节点有富余(大于（m-1）/2-1)，父节点下移，兄弟节点key上移，删除结束，否则执行第8步
+        if(brotherNode.keys.size() > mergeSize){
+
+            // 移除兄弟节点的第一个关键字
+            K moveBrothKey = brotherNode.keys.remove(0);
+            Node<K,V> moveBrothFistChild =  brotherNode.children.remove(0);
+            // 将兄弟节点的关键字移动到父节点
+            parentNode.keys.set(moveParentKeyIndex,moveBrothKey);
+
+            // 父节点的key是当前最大的key,添加到最后
+            this.keys.add(moveParentKey);
+            this.children.add(moveBrothFistChild);
+            moveBrothFistChild.parent = this;
+
+        }else{
+            // 8.当前节点和兄弟节点以及父节点下移合成一个节点(合并后不会造成节点分裂情况)，将当前节点指向父节点，重复第6步
+            this.keys.add(moveParentKey);
+            this.keys.addAll(brotherNode.keys);
+
+            for(Node brotherChild:brotherNode.children){
+                brotherChild.parent = this;
+            }
+            this.children.addAll(brotherNode.children);
+
+            // 移除父节点中对应的关键字
+            parentNode.keys.remove(moveParentKey);
+
+            // 删除节点
+            deleteNode(brotherNode);
+
+            // 调用父节点合并
+            if(parentNode.keys.size() > 0){
+                parentNode.merge();
+            }else{
+                // 父节点没有子节点，当前节点就为根节点
+                this.parent = null;
+                BPlusTree.INSTANCE.root = this;
+            }
+        }
+    }
+
+    private InternalNode<K,V> findBrothNode() {
+        if(null == this.parent){
+            return null;
+        }
+        InternalNode<K,V> parentNode = (InternalNode)this.parent;
+        if(parentNode.children.size() <= 1){
+            return null;
+        }
+        int pPosition = Collections.binarySearch(parentNode.keys,this.keys.get(this.keys.size()-1));
+        // pPosition不会存在于父节点关键字中，所以为负数
+        int brotherIndex = -pPosition;
+//        if(brotherIndex == parentNode.children.size()){
+//            // 取左兄弟
+//            brotherIndex = brotherIndex-2;
+//        }
+        InternalNode<K,V> brotherNode = (InternalNode)parentNode.children.get(brotherIndex);
+        return brotherNode;
     }
 
     /**
@@ -113,6 +208,20 @@ public class InternalNode<K extends Comparable<? super K>,V> extends Node<K,V>{
         this.propogate(parentKey,this,rightBrother);
 
         return rightBrother;
+    }
+
+    /**
+     * 删除节点
+     * @param node
+     */
+    private void deleteNode(InternalNode<K,V> node){
+        node.keys.clear();
+        node.children.clear();
+        System.out.println(String.format("this.keys [%s] ---- brotherNode.keys [%s]",this.keys, node.keys));
+        System.out.println(String.format("this.values [%s] ---- brotherNode.children [%s]",this.children, node.children));
+        node.keys = null;
+        node.children = null;
+        node.parent = null;
     }
 
 
